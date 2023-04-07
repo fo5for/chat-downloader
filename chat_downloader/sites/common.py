@@ -301,7 +301,8 @@ class Chat():
         :param item: The chat item to be printed
         :type item: dict
         """
-        safe_print(self.format(item), flush=flush)
+        if self._output_writer is None:
+            safe_print(self.format(item), flush=flush)
 
     def format(self, item):
         """Format chat messages
