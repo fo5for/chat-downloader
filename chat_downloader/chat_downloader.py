@@ -92,6 +92,7 @@ class ChatDownloader():
 
                  message_groups=SiteDefault('message_groups'),
                  message_types=None,
+                 filters=[],
 
                  # Output
                  output=None,
@@ -146,6 +147,9 @@ class ChatDownloader():
         :type message_groups: SiteDefault, optional
         :param message_types: List of messages types to include, defaults to None
         :type message_types: list, optional
+        :param filter: List of filters to search for, messages that match
+            all the filters are included, defaults to []
+        :type filter: list, optional
         :param output: Path of the output file, defaults to None (print to
             standard output)
         :type output: str, optional
