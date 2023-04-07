@@ -149,11 +149,11 @@ class ChatDownloader():
         :type message_groups: SiteDefault, optional
         :param message_types: List of messages types to include, defaults to None
         :type message_types: list, optional
-        :param filter: List of filters to search for, messages that match
+        :param filter: List `k=v` pairs of filters to search for, messages that match
             all the filters are included, defaults to []
         :type filter: list, optional
-        :param output: Path of the output file, defaults to None (print to
-            standard output)
+        :param output: Path of the output file, formatted with fields `title` and `id`,
+            defaults to None (print to standard output)
         :type output: str, optional
         :param overwrite: If True, overwrite output file. Otherwise, append
             to the end of the file. Defaults to True. In both cases, the file
