@@ -281,6 +281,7 @@ class Chat():
         """
         try:
             item = next(self.chat)
+            item['id'] = self.id
 
             if self._output_writer is not None:  # writer has been attached
                 self._init_writer()

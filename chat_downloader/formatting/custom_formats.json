@@ -56,6 +56,12 @@
             }
         }
     ],
+    "youtube_timestamp": {
+        "template": "https://youtu.be/{id}?t={time_in_seconds}",
+        "keys": {
+            "time_in_seconds": "{:.0f}"
+        }
+    },
     "twitch": [
         {
             "matching": [
