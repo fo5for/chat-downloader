@@ -44,7 +44,9 @@ from .errors import (
     InvalidURL,
     ChatDownloaderError,
     ChatGeneratorError,
-    ParsingError
+    ParsingError,
+    NoChatReplay,
+    ChatDisabled
 )
 
 
@@ -321,7 +323,7 @@ class ChatDownloader():
         self.sessions = {}
 
 
-def run(propagate_interrupt=False, **kwargs):
+def run(propagate_interrupt=False, all=False, **kwargs):
     """
     Create a single session and get the chat using the specified parameters.
     """
@@ -354,15 +356,38 @@ def run(propagate_interrupt=False, **kwargs):
     try:
         chat = downloader.get_chat(**chat_params)
 
-        if kwargs.get('quiet'):  # Only check if quiet once
-            def callback(item):
-                pass
-        else:
-            def callback(item):
-                chat.print_formatted(item)
+        if all:
+            def try_get_chat(vid, chat_params_nourl):
+                try:
+                    return downloader.get_chat(url = f'https://youtu.be/{vid["video_id"]}', **chat_params_nourl)
+                except (
+                    ChatDisabled,
+                    NoChatReplay
+                ):
+                    return None
 
-        for message in chat:
-            callback(message)
+            chat_params_nourl = { k: v for k, v in chat_params.items() if k != 'url' }
+            chats = map(
+                lambda vid: try_get_chat(vid, chat_params_nourl),
+                itertools.chain(*map(
+                    lambda t: chat.site.get_user_videos(**chat.site.user_video_args, video_type=t),
+                    ('videos', 'live', 'shorts')
+                )) # TODO params?
+            )
+        else:
+            chats = (chat,)
+
+        for chat in chats:
+            if chat is not None:
+                if kwargs.get('quiet'):  # Only check if quiet once
+                    def callback(item):
+                        pass
+                else:
+                    def callback(item):
+                        chat.print_formatted(item)
+
+                for message in chat:
+                    callback(message)
 
         log('info', 'Finished retrieving chat messages.')
 

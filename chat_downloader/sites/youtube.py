@@ -59,6 +59,7 @@ class YouTubeChatDownloader(BaseChatDownloader):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.user_video_args = None
         self._initialize_consent()
 
     _NAME = 'youtube.com'
@@ -2086,9 +2087,8 @@ class YouTubeChatDownloader(BaseChatDownloader):
             raise ValueError(f'Invalid user_type: {user_type}')
 
     def get_chat_by_channel_id(self, channel_id, params):
-        return self._get_chat_by_user_args({
-            'channel_id': channel_id
-        }, params)
+        self.user_video_args = { 'channel_id': channel_id }
+        return self._get_chat_by_user_args(self.user_video_args, params)
 
     def get_chat_by_user_id(self, user_id, params):
         """
@@ -2097,19 +2097,16 @@ class YouTubeChatDownloader(BaseChatDownloader):
         :param user_id:
         :type user_id: [type]
         """
-        return self._get_chat_by_user_args({
-            'user_id': user_id
-        }, params)
+        self.user_video_args = { 'user_id': user_id }
+        return self._get_chat_by_user_args(self.user_video_args, params)
 
     def get_chat_by_custom_username(self, custom_username, params):
-        return self._get_chat_by_user_args({
-            'custom_username': custom_username
-        }, params)
+        self.user_video_args = { 'custom_username': custom_username }
+        return self._get_chat_by_user_args(self.user_video_args, params)
 
     def get_chat_by_handle(self, handle, params):
-        return self._get_chat_by_user_args({
-            'handle': handle
-        }, params)
+        self.user_video_args = { 'handle': handle }
+        return self._get_chat_by_user_args(self.user_video_args, params)
 
     def _get_chat_by_user_args(self, user_video_args, params):
         # TODO add param for wait time

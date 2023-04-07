@@ -128,6 +128,8 @@ def main(cli_args=None):
     add_chat_param(youtube_group, '--chat_type',
                    choices=['live', 'top'])
     add_chat_param(youtube_group, '--ignore', type=splitter)
+    youtube_group.add_argument('--all',
+                   action='store_true', help='Include all videos of a channel, defaults to False')
     # add_chat_param(
     #     youtube_group, '--force_no_timeout', action='store_true')
 
