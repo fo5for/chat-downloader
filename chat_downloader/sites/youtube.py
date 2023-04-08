@@ -563,7 +563,7 @@ class YouTubeChatDownloader(BaseChatDownloader):
                     (?:
                         (?P<type>channel/|c/|user/|@)
                     )?
-                    (?P<id>[a-zA-Z0-9_-]+)'''
+                    (?P<id>[a-zA-Z0-9\._-]+)'''
     }
 
     @staticmethod
