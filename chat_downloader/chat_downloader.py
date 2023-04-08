@@ -373,7 +373,7 @@ def run(propagate_interrupt=False, all=False, **kwargs):
                     lambda vid: vid['video_type'] not in ('LIVE', 'UPCOMING'),
                     itertools.chain(*map(
                         lambda t: chat.site.get_user_videos(**chat.site.user_video_args, video_type=t),
-                        ('videos', 'live', 'shorts')
+                        ('videos', 'live')
                     )) # TODO params?
                 )
             )
