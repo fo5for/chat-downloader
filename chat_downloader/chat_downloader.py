@@ -369,10 +369,13 @@ def run(propagate_interrupt=False, all=False, **kwargs):
             chat_params_nourl = { k: v for k, v in chat_params.items() if k != 'url' }
             chats = map(
                 lambda vid: try_get_chat(vid, chat_params_nourl),
-                itertools.chain(*map(
-                    lambda t: chat.site.get_user_videos(**chat.site.user_video_args, video_type=t),
-                    ('videos', 'live', 'shorts')
-                )) # TODO params?
+                filter(
+                    lambda vid: vid['video_type'] not in ('LIVE', 'UPCOMING'),
+                    itertools.chain(*map(
+                        lambda t: chat.site.get_user_videos(**chat.site.user_video_args, video_type=t),
+                        ('videos', 'live', 'shorts')
+                    )) # TODO params?
+                )
             )
         else:
             chats = (chat,)
