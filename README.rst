@@ -74,7 +74,7 @@ Command line
     usage: chat_downloader [-h] [--version] [--start_time START_TIME]
                            [--end_time END_TIME]
                            [--message_types MESSAGE_TYPES | --message_groups MESSAGE_GROUPS]
-                           [--filter FILTERS] [--max_attempts MAX_ATTEMPTS]
+                           [--filter FILTERS] [--re] [--max_attempts MAX_ATTEMPTS]
                            [--retry_timeout RETRY_TIMEOUT]
                            [--interruptible_retry [INTERRUPTIBLE_RETRY]]
                            [--max_messages MAX_MESSAGES]

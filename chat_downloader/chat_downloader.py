@@ -95,6 +95,7 @@ class ChatDownloader():
                  message_groups=SiteDefault('message_groups'),
                  message_types=None,
                  filters=[],
+                 re=False,
 
                  # Output
                  output=None,
@@ -152,6 +153,8 @@ class ChatDownloader():
         :param filter: List of `k=v` pairs of filters to search for, messages that match
             all the filters are included, defaults to []
         :type filter: list, optional
+        :param re: Search filters as regular expressions, defaults to False.
+        :type re: bool, optional
         :param output: Path of the output file, formatted with fields `title` and `id`,
             defaults to None (print to standard output)
         :type output: str, optional

@@ -1719,6 +1719,7 @@ class YouTubeChatDownloader(BaseChatDownloader):
         messages_groups_to_add = params.get('message_groups') or []
         messages_types_to_add = params.get('message_types') or []
         filters = dict(map(lambda x: (x[0], '='.join(x[1:])), map(lambda x: x.split('='), params.get('filters') or [])))
+        pred = (lambda data: not all(map(lambda i: re.search(i[1], str(multi_get(data, *i[0].split('.')))), filters.items()))) if params.get('re') or False else (lambda data: not all(map(lambda i: i[1] in str(multi_get(data, *i[0].split('.'))), filters.items())))
 
         invalid_groups = set(messages_groups_to_add) - \
             self._MESSAGE_GROUPS.keys()
@@ -1966,7 +1967,7 @@ class YouTubeChatDownloader(BaseChatDownloader):
                     #     data['time_in_seconds'] = (data['timestamp'] - stream_start_time)/1e6
                     #     data['time_text'] = seconds_to_time(int(data['time_in_seconds']))
 
-                    if any(map(lambda i: i[1] not in str(multi_get(data, *i[0].split('.'))), filters.items())):
+                    if pred(data):
                         continue
 
                     message_count += 1
