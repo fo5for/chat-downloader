@@ -149,7 +149,7 @@ class ChatDownloader():
         :type message_groups: SiteDefault, optional
         :param message_types: List of messages types to include, defaults to None
         :type message_types: list, optional
-        :param filter: List `k=v` pairs of filters to search for, messages that match
+        :param filter: List of `k=v` pairs of filters to search for, messages that match
             all the filters are included, defaults to []
         :type filter: list, optional
         :param output: Path of the output file, formatted with fields `title` and `id`,

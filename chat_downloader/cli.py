@@ -94,7 +94,7 @@ def main(cli_args=None):
 
     add_chat_param(type_options, '--message_types', type=splitter)
     add_chat_param(type_options, '--message_groups', type=splitter)
-    add_chat_param(type_group, '--filter', type=splitter, dest="filters")
+    add_chat_param(type_group, '--filter', type=splitter, dest='filters')
 
     retry_group = parser.add_argument_group(
         'Retry Arguments')  # what to do when an error occurs
