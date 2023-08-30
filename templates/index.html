@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Downloader - fosfor.dev</title>
+</head>
+<body>
+    <form method="post">
+        <label for="url">URL</label>
+        <br>
+        <input type="text" name="url" placeholder="https://www.youtube.com/watch?v=..." value="{{ request.form['url'] }}"></input>
+        <br>
+
+        <label for="message">Message filter</label>
+        <br>
+        <input name="message" placeholder="Message" value="{{ request.form['message'] }}"></input>
+        <br>
+
+        <label for="author_name">Author filter</label>
+        <br>
+        <input name="author_name" placeholder="Author" value="{{ request.form['author_name'] }}"></input>
+        <br>
+
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
