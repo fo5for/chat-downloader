@@ -4,3 +4,4 @@ isodate
 docstring-parser
 colorlog
 websocket-client
+urllib3<2.0.0
