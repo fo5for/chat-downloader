@@ -13,12 +13,12 @@
 
         <label for="message">メッセージ検索</label>
         <br>
-        <input name="message" value="{{ request.form['message'] }}"></input>
+        <input type="text" name="message" value="{{ request.form['message'] }}"></input>
         <br>
 
         <label for="author_name">ユーザー名検索</label>
         <br>
-        <input name="author_name" value="{{ request.form['author_name'] }}"></input>
+        <input type="text" name="author_name" value="{{ request.form['author_name'] }}"></input>
         <br>
 
         <button type="submit">検索</button>
