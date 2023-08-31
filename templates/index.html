@@ -6,22 +6,22 @@
 </head>
 <body>
     <form method="post">
-        <label for="url">URL</label>
+        <label for="url">配信URL</label>
         <br>
-        <input type="text" name="url" placeholder="https://www.youtube.com/watch?v=..." value="{{ request.form['url'] }}"></input>
-        <br>
-
-        <label for="message">Message filter</label>
-        <br>
-        <input name="message" placeholder="Message" value="{{ request.form['message'] }}"></input>
+        <input type="text" name="url" placeholder="https://www.youtube.com/watch?v=..." size="40" value="{{ request.form['url'] }}"></input>
         <br>
 
-        <label for="author_name">Author filter</label>
+        <label for="message">メッセージ検索</label>
         <br>
-        <input name="author_name" placeholder="Author" value="{{ request.form['author_name'] }}"></input>
+        <input name="message" value="{{ request.form['message'] }}"></input>
         <br>
 
-        <button type="submit">Submit</button>
+        <label for="author_name">ユーザー名検索</label>
+        <br>
+        <input name="author_name" value="{{ request.form['author_name'] }}"></input>
+        <br>
+
+        <button type="submit">検索</button>
     </form>
 </body>
 </html>
