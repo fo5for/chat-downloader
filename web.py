@@ -2,6 +2,7 @@ import io
 import contextlib
 from flask import Flask, render_template, request, make_response
 import chat_downloader.cli
+from chat_downloader.sites.twitch import TwitchChatDownloader
 
 app = Flask(__name__)
 
@@ -25,7 +26,10 @@ def index():
         if message:
             filters.append(f"message={message}")
         if author_name:
-            filters.append(f"author.name={author_name}")
+            if TwitchChatDownloader.matches(url):
+                filters.append(f"author.display_name={author_name}")
+            else:
+                filters.append(f"author.name={author_name}")
         
         if filters:
             cli_args.append("--filter")
