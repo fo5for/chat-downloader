@@ -526,8 +526,8 @@ class YouTubeChatDownloader(BaseChatDownloader):
                             youtube\.googleapis\.com/)                        # the various hostnames, with wildcard subdomains
                          (?:.*?\#/)?                                          # handle anchor (#/) redirect urls
                          (?:                                                  # the various things that can precede the ID:
-                             # v/ or embed/ or e/
-                             (?:(?:v|embed|e)/(?!videoseries))
+                             # v/ or embed/ or e/, or the newer shorts/, live/ or watch/
+                             (?:(?:v|embed|e|shorts|live|watch)/(?!videoseries))
                              |(?:                                             # or the v= param in all its forms
                                  # preceding watch(_popup|.php) or nothing (like /?v=xxxx)
                                  (?:(?:watch|movie)(?:_popup)?(?:\.php)?/?)?
@@ -919,8 +919,15 @@ class YouTubeChatDownloader(BaseChatDownloader):
         # gifts
         'primaryText': r('message', _parse_text),
 
+        'bannerType': 'banner_type',
         'bannerProperties': 'banner_properties',
         'headerOverlayImage': r('header_overlay_image', _parse_thumbnails),
+
+        # hearted message
+        'creatorHeartButton': 'creator_heart_button',
+
+        # other
+        'lowerBumper': 'lower_bumper',
     }
 
     _COLOUR_KEYS = [
@@ -963,7 +970,10 @@ class YouTubeChatDownloader(BaseChatDownloader):
         'header', 'contents', 'actionId',
 
         # tooltipRenderer
-        'dismissStrategy', 'suggestedPosition', 'promoConfig'
+        'dismissStrategy', 'suggestedPosition', 'promoConfig',
+
+        # redundant field for ticker renderer
+        'authorUsername',
     ]
 
     _KNOWN_KEYS = set(list(_REMAPPING.keys()) +
@@ -1358,21 +1368,10 @@ class YouTubeChatDownloader(BaseChatDownloader):
     def _initialize_consent(self):
         if self.get_cookie_value('__Secure-3PSID'):
             return
-
-        consent_id = None
-        consent = self.get_cookie_value('CONSENT')
-
-        if consent:
-            if 'YES' in consent:
-                return
-
-            consent_id = regex_search(consent, self._CONSENT_ID_REGEX)
-
-        if not consent_id:
-            consent_id = random.randint(100, 999)
-
-        self.set_cookie_value('.youtube.com', 'CONSENT',
-                              f'YES+cb.20210328-17-p0.en+FX+{consent_id}')
+        socs = self.get_cookie_value('SOCS')
+        if socs and not socs.value.startswith('CAA'):  # not consented
+            return
+        self.set_cookie_value('.youtube.com', 'SOCS', 'CAI', secure=True)  # accept all (required for mixes)
 
     def _generate_sapisidhash_header(self):
         sapis_id = self.get_cookie_value('SAPISID')
@@ -1718,8 +1717,6 @@ class YouTubeChatDownloader(BaseChatDownloader):
 
         messages_groups_to_add = params.get('message_groups') or []
         messages_types_to_add = params.get('message_types') or []
-        filters = dict(map(lambda x: (x[0], '='.join(x[1:])), map(lambda x: x.split('='), params.get('filters') or [])))
-        pred = (lambda data: not all(map(lambda i: re.search(i[1], str(multi_get(data, *i[0].split('.')))), filters.items()))) if params.get('re') or False else (lambda data: not all(map(lambda i: i[1] in str(multi_get(data, *i[0].split('.'))), filters.items())))
 
         invalid_groups = set(messages_groups_to_add) - \
             self._MESSAGE_GROUPS.keys()
@@ -1966,9 +1963,6 @@ class YouTubeChatDownloader(BaseChatDownloader):
                     # if data.get('time_in_seconds') is None and data.get('timestamp') and stream_start_time:
                     #     data['time_in_seconds'] = (data['timestamp'] - stream_start_time)/1e6
                     #     data['time_text'] = seconds_to_time(int(data['time_in_seconds']))
-
-                    if pred(data):
-                        continue
 
                     message_count += 1
                     yield data

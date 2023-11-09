@@ -3,6 +3,7 @@ import sys
 import itertools
 import time
 import json
+import re
 
 from urllib.parse import urlparse
 
@@ -16,6 +17,7 @@ from .sites import get_all_sites
 
 from .formatting.format import ItemFormatter
 from .utils.core import (
+    multi_get,
     safe_print,
     get_default_args,
     update_dict_without_overwrite
@@ -383,6 +385,10 @@ def run(propagate_interrupt=False, all=False, **kwargs):
         else:
             chats = (chat,)
 
+        all = __builtins__["all"]
+        filters = dict(map(lambda x: (x[0], '='.join(x[1:])), map(lambda x: x.split('='), chat_params.get('filters') or [])))
+        pred = (lambda data: all(map(lambda i: re.search(i[1], str(multi_get(data, *i[0].split('.')))), filters.items()))) if chat_params.get('re') or False else (lambda data: all(map(lambda i: i[1] in str(multi_get(data, *i[0].split('.'))), filters.items())))
+
         for chat in chats:
             if chat is not None:
                 if kwargs.get('quiet'):  # Only check if quiet once
@@ -393,7 +399,8 @@ def run(propagate_interrupt=False, all=False, **kwargs):
                         chat.print_formatted(item)
 
                 for message in chat:
-                    callback(message)
+                    if pred(message):
+                        callback(message)
 
         log('info', 'Finished retrieving chat messages.')
 

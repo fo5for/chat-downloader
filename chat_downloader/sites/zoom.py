@@ -10,7 +10,8 @@ from .common import (
 from ..utils.core import (
     time_to_seconds,
     regex_search,
-    ensure_seconds
+    ensure_seconds,
+    multi_get,
 )
 from ..errors import (
     SiteError,
@@ -34,8 +35,8 @@ class ZoomChatDownloader(BaseChatDownloader):
 
     _ZOOM_HOMEPAGE = 'https://zoom.us/'
     _ZOOM_PATH_TEMPLATE = 'rec/play/{id}'
+    _ZOOM_API_TEMPLATE = 'nws/recording/1.0/play/info/{file_id}'
 
-    _INITIAL_INFO_REGEX = r'(?s)window\.__data__\s*=\s*({.+?});'
     _CHAT_MESSAGES_REGEX = r'window\.__data__\.chatList\.push\((\{[\s\S]+?\})\)'
 
     _SITE_DEFAULT_PARAMS = {
@@ -43,7 +44,7 @@ class ZoomChatDownloader(BaseChatDownloader):
     }
 
     _REMAPPING = {
-        'username': 'author_name',
+        'userName': 'author_name',
         'time': 'time_text',
         'content': 'message',
     }
@@ -94,7 +95,6 @@ class ZoomChatDownloader(BaseChatDownloader):
     _VALID_URLS = {
         '_get_chat_by_video_id': r'(?P<base_url>https?://(?:[^.]+\.)?zoom.us/)rec(?:ording)?/(?:play|share)/(?P<id>[A-Za-z0-9_.-]+)',
     }
-    _ERROR_MESSAGE_REGEX = r'<span class="error-message">\s*([^<]+?)\s*<\/span>'
 
     def _get_chat_by_video_id(self, match, params):
         match_id = match.group('id')
@@ -102,30 +102,28 @@ class ZoomChatDownloader(BaseChatDownloader):
         return self.get_chat_by_video_id(match_id, params, base_url=base_url)
 
     def get_chat_by_video_id(self, video_id, params, base_url=_ZOOM_HOMEPAGE):
+        api_url = base_url + self._ZOOM_API_TEMPLATE.format(file_id=video_id)
 
-        url = base_url + self._ZOOM_PATH_TEMPLATE.format(id=video_id)
-        page_data = self._session_get(url).text
+        api_data = self._session_get_json(api_url)
 
-        json_string = regex_search(page_data, self._INITIAL_INFO_REGEX)
+        if api_data.get('errorCode') != 0:
+            raise ZoomError(
+                f'An error occured: {api_data.get("errorMessage")} ({api_data.get("errorCode")})')
 
-        if json_string is None:
-            error_message = regex_search(page_data, self._ERROR_MESSAGE_REGEX)
-            if error_message:
-                raise ZoomError(error_message.split('\n')[0])
-            else:
-                raise ParsingError('Error parsing video')
+        result = api_data.get('result')
+        if not result:
+            raise ZoomError(
+                f'Unable to find chat messages for video {video_id}')
 
-        initial_info = self._parse_js_dict(json_string)
-
-        video_type = 'video' if initial_info.get('isVideo') else 'not_video'
-
+        chat_messages = result.get('meetingChatList') or []
+        title = multi_get(result, 'meet', 'topic')
         return Chat(
-            self._get_chat_messages(page_data, params),
-
-            title=initial_info.get('topic'),
-            video_type=video_type,
-            start_time=initial_info.get('fileStartTime'),
-            id=initial_info.get('recordingId'),
+            self._get_chat_messages(chat_messages, params),
+            title=title,
+            video_type='video',
+            start_time=result.get('fileStartTime'),
+            id=video_id,
+            duration=result.get('duration'),
         )
 
     def _parse_js_dict(self, json_string):
@@ -136,12 +134,11 @@ class ZoomChatDownloader(BaseChatDownloader):
         result = re.sub(r":\s+'(.*)'", ": \"\\g<1>\"", result, 0, re.MULTILINE)
         return json.loads(result)
 
-    def _get_chat_messages(self, page_data, params):
+    def _get_chat_messages(self, messages, params):
         start_time = ensure_seconds(params.get('start_time'), 0)
         end_time = ensure_seconds(params.get('end_time'), float('inf'))
 
-        for item in re.findall(self._CHAT_MESSAGES_REGEX, page_data):
-            data = self._parse_js_dict(item)
+        for data in messages:
             data = r.remap_dict(data, self._REMAPPING)
 
             # Process time inforamtion
