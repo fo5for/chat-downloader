@@ -401,7 +401,7 @@ def safe_path(text, replace_char='_'):
     """Ensure generated file name/path is safe
     https://stackoverflow.com/a/31976060
     """
-    return re.sub(r'[\/:*?"<>|]', replace_char, text)
+    return re.sub(r'[\/:*?"<>|]', replace_char, text) if text else text
 
 
 # Adapted from https://github.com/micktwomey/pyiso8601/

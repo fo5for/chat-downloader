@@ -1528,10 +1528,12 @@ class YouTubeChatDownloader(BaseChatDownloader):
 
         # Parse continuation info
         sub_menu_items = multi_get(yt_initial_data, 'contents', 'twoColumnWatchNextResults', 'conversationBar', 'liveChatRenderer',
-                                   'header', 'liveChatHeaderRenderer', 'viewSelector', 'sortFilterSubMenuRenderer', 'subMenuItems') or {}
+                                'header', 'liveChatHeaderRenderer', 'viewSelector', 'sortFilterSubMenuRenderer', 'subMenuItems') or {}
+        continuations = multi_get(yt_initial_data, 'contents', 'twoColumnWatchNextResults', 'conversationBar', 'liveChatRenderer',
+                                'continuations') or {}
         details['continuation_info'] = {
-            x['title']: x['continuation']['reloadContinuationData']['continuation']
-            for x in sub_menu_items
+            x['title']: y['reloadContinuationData']['continuation']
+            for x in sub_menu_items for y in continuations
         }
 
         # live, upcoming or past
